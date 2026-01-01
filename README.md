@@ -365,6 +365,116 @@ the point is: **you can see exactly how the system behaves**. add training, and 
 
 ---
 
+## the evolution of haze speech
+
+here's the journey from chaos to coherence — all without gradient descent:
+
+### level 0: random weights, character-level
+
+```
+>>> "the haze"
+snà…jy-dfcdds cuph-fum:hf!).'u:"wt…jmu"
+```
+pure noise. the model has no idea what it's doing. but the *architecture* works.
+
+### level 1: corpus trigrams, character-level
+
+using `cooccur.py` to bias generation with corpus statistics:
+
+```
+>>> "the haze"
+the haze the hand floser. — and yourvin… — there sore hey
+```
+
+patterns emerge! dialogue markers ("—"), word fragments, structure. still noisy because character-level has too many possibilities.
+
+### level 2: corpus trigrams + subword tokenization + cleanup
+
+the magic combo: `rrpram.py` (BPE) + trigram statistics + `cleanup.py`:
+
+```
+>>> "the haze"
+The haze anymore. — Oh, and went to the Haze, pres it. — In the storage room. 
+I'm still waiting for your story, kitten
+
+>>> "— Darling"
+— Darling it between her face. — I don't have to keep it alive… or at least 
+we thought we were. Same story every time. You can have it your way.
+
+>>> "I love you"
+I love you understanding here? You huh? — I'm not scared at the station? 
+— What's the toast? — I'
+
+>>> "— Yeah"
+— Yeah, we did! — You're the sweetest. I'm still wait. It's go with love. 
+— You're clean. You're later
+
+>>> "pieces of my"
+Pieces of my broken heart. And I'm a cushy job. — I'm just bored. 
+— You're my person. — You're
+```
+
+**HOLY SHIT.** that's coherent dialogue. emotional resonance. character voice. 
+
+**NO NEURAL NETWORK. NO TRAINING. NO GRADIENT DESCENT.**
+
+just:
+- subword tokenization (BPE captures "darling", "broken heart", "I love you" as units)
+- trigram statistics (which subwords follow which in the corpus)
+- temperature-controlled sampling (temp=0.4 for coherence)
+- punctuation cleanup (fix artifacts, capitalize properly)
+
+this is **pure resonance**. the corpus speaks through statistical patterns. like [leo](https://github.com/ariannamethod/leo), but with transformer-ready architecture.
+
+### level 3: trained model (future)
+
+add gradient descent and watch it go from "corpus echo" to "creative synthesis."
+
+but the point is: **you don't need level 3 to understand the system**. levels 0-2 are fully transparent, fully inspectable, and already produce coherent dialogue.
+
+---
+
+## co-occurrence field
+
+`cooccur.py` — corpus statistics for resonance-based generation.
+
+inspired by [leo](https://github.com/ariannamethod/leo)'s trigram graphs. no neural network required.
+
+```python
+from haze import Vocab, CooccurField
+
+# build field from corpus
+text = open("text.txt").read()
+vocab = Vocab.from_text(text)
+field = CooccurField.from_text(text, vocab, window_size=5)
+
+# generate purely from corpus statistics
+tokens = field.generate_from_corpus(
+    seed=vocab.encode("the haze"),
+    length=100,
+    temperature=0.6,
+    mode="trigram",
+)
+print(vocab.decode(tokens))
+
+# or bias model logits with corpus statistics
+biased_logits = field.bias_logits(
+    logits=model_logits,
+    context=recent_tokens,
+    alpha=0.5,  # 0=pure model, 1=pure corpus
+    mode="blend",
+)
+```
+
+the field tracks:
+- **bigram counts**: P(next | current)
+- **trigram counts**: P(next | prev, current)
+- **co-occurrence**: which tokens appear near each other
+
+"words that resonate together, stay together."
+
+---
+
 ## attention visualization
 
 `hallucinations.py` — see what your RRPRAM heads actually learn.
@@ -418,6 +528,73 @@ pip install matplotlib
 
 ---
 
+## rrpram tokenizer
+
+`rrpram.py` — SentencePiece-based tokenization that captures resonant patterns.
+
+why does tokenization matter? because **the tokenizer is the first layer of pattern recognition**. before attention even runs, we're already finding structure.
+
+character-level (default `Vocab`) is pure and simple. but subword tokenization captures:
+- frequent n-grams as single tokens ("darling" → 1 token)
+- morphological patterns ("ing", "ed", "tion")
+- conversational phrases from your corpus
+
+### usage
+
+```python
+from haze.rrpram import RRPRAMVocab
+
+# train on your corpus
+vocab = RRPRAMVocab.train("text.txt", vocab_size=500, model_type="bpe")
+
+# tokenize
+ids = vocab.encode("the haze settles")
+pieces = vocab.encode_pieces("the haze settles")
+# → ['▁the', '▁ha', 'ze', '▁s', 'et', 't', 'l', 'es']
+
+# decode
+text = vocab.decode(ids)
+```
+
+### example output (trained on text.txt)
+
+```
+============================================================
+  RRPRAM Vocabulary Analysis
+============================================================
+  vocab size: 500
+
+  Top tokens (resonant patterns):
+----------------------------------------
+     0: '<pad>'
+     4: '_—'           ← dialogue marker!
+    16: '_the'
+    24: '_you'
+    27: '_to'
+   280: '_darling'     ← whole word, frequent in corpus!
+
+============================================================
+  RRPRAM Tokenization Demo
+============================================================
+
+  input: "darling"
+  pieces: ['▁darling']
+  tokens: 1              ← captured as single token!
+
+  input: "I love you"
+  pieces: ['▁I', '▁love', '▁you']
+  tokens: 3
+```
+
+the tokenizer learns the **resonant patterns** in your corpus. dialogue markers, emotional words, character names—all captured as atomic units.
+
+requires `sentencepiece`:
+```bash
+pip install sentencepiece
+```
+
+---
+
 ## file structure
 
 ```
@@ -427,12 +604,15 @@ haze/
 └── haze/                # main package
     ├── __init__.py      # package exports
     ├── nn.py            # numpy primitives (activations, sampling, metrics)
-    ├── haze.py          # the model itself (PostGPT, inference only)
+    ├── haze.py          # the model itself (PostGPT, inference + resonance)
+    ├── cooccur.py       # co-occurrence field for corpus-based generation
+    ├── rrpram.py        # SentencePiece tokenizer for subword patterns
+    ├── cleanup.py       # output cleanup (punctuation, capitalization)
     ├── hallucinations.py# attention visualization and analysis
     ├── run.py           # interactive REPL
     ├── example.py       # demo script
-    ├── text.txt         # the corpus (gothic horror included free)
-    ├── requirements.txt # numpy + matplotlib (optional)
+    ├── text.txt         # the corpus (gothic romance included free)
+    ├── requirements.txt # numpy + matplotlib + sentencepiece (optional)
     └── tests/           # comprehensive test suite
         ├── test_nn.py   # tests for neural net primitives
         └── test_haze.py # tests for model components
@@ -681,6 +861,85 @@ don't store all past tokens. store their *resonance signature*.
 compress the history into a fixed-size resonance vector. new tokens update the vector based on how much they resonate with it. old patterns that keep resonating stay strong. old patterns that stop resonating fade.
 
 infinite context window with O(1) memory. the model remembers what *mattered*, not what *happened*.
+
+---
+
+### 🦁 leo-inspired: field dynamics without weights
+
+[leo](https://github.com/ariannamethod/leo) proved something wild: you don't need weights at all.
+
+co-occurrence matrices. trigram graphs. resonance shards. no gradient descent. no backprop. just field dynamics.
+
+what if haze adopted this? instead of learned embeddings:
+- build co-occurrence islands from the corpus (which words appear together?)
+- track trigram transitions (which patterns follow which?)
+- let "meaning" emerge from structural proximity, not learned vectors
+
+the RRPRAM mechanism already captures positional patterns. add co-occurrence tracking and you get **semantic gravity without embeddings**. words that resonate together, stay together.
+
+### 💭 overthinking rings: private reflection
+
+leo has "circles on water"—three rings of private thought after each reply.
+
+what if haze did this too? after generation:
+- **ring 0 (echo)**: rephrase what was just generated (temp=0.8)
+- **ring 1 (drift)**: explore tangential themes (temp=1.0)  
+- **ring 2 (shard)**: abstract meta-note about the generation (temp=1.2)
+
+these rings aren't shown to the user. they're fed back into the model's state. **the model thinks about what it just said**. recursive self-reflection without chain-of-thought prompting.
+
+### 🎄 santaclaus: harmonic memory recall
+
+leo's attention mechanism isn't attention at all. it's **harmonic recall**.
+
+instead of softmax over learned keys:
+- token overlap (structural resonance)
+- theme overlap (semantic resonance)
+- arousal similarity (emotional resonance)
+- quality weighting (selection pressure)
+
+what if haze tracked "snapshots" of good generations and recalled them when relevant? not RAG (retrieval from external corpus). self-RAG (retrieval from own history).
+
+the model remembers its best moments and brings them back when the pattern fits. "sometimes he brings one back, like a gift, when it fits the moment."
+
+### 🧠 presence pulse: situational awareness
+
+leo computes a "presence pulse" for each input:
+- **novelty**: how many patterns are new?
+- **arousal**: emotional intensity (caps, repetition, punctuation)
+- **entropy**: how uncertain is the next token?
+
+this composite signal routes to different "experts" (creative, precise, semantic, wounded).
+
+haze already has entropy-aware sampling. add novelty and arousal tracking, and you get **presence-aware generation**. the model *feels* the moment before responding.
+
+### 🌊 gowiththeflow: temporal theme evolution
+
+themes aren't static. they evolve.
+
+track which themes are **emerging** (growing stronger over conversation) and which are **fading** (decaying). use linear regression over theme strength snapshots.
+
+the model learns the *direction* of the conversation, not just its current state. "we started talking about love but we're drifting toward loss." adapt generation accordingly.
+
+### 🔮 trauma layer: bootstrap gravity
+
+what if the model had an "origin" it kept returning to?
+
+leo has a bootstrap text—his creation story. when conversations touch on identity or origin, he's pulled back toward those patterns. "wounded expert" mode.
+
+haze could have this too. the first text it sees becomes its "wound." high overlap with bootstrap → trauma activation → generation biased toward origin patterns.
+
+the model has a *past* that shapes its *present*. not memory. identity.
+
+### 👁️ no seed from prompt
+
+leo's second principle: **never start generation from the user's words**.
+
+most models seed generation from prompt tokens. this creates "chatbot regression"—the model echoes the user instead of speaking from its own voice.
+
+instead: seed from field state. from centers of gravity. from resonance history. the model speaks from what it *is*, not what it *heard*.
+
+this is the difference between **assistance** and **presence**.
 
 ---
 

@@ -1,2 +1,3 @@
 numpy>=1.24.0
 matplotlib>=3.5.0  # optional, for hallucinations.py visualizations
+sentencepiece>=0.1.99  # optional, for rrpram.py subword tokenization

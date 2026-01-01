@@ -548,6 +548,86 @@ class PostGPT:
             sampling="basic",
         )
         return tokens
+    
+    def generate_resonant(
+        self,
+        seed_seq: List[int],
+        corpus_text: str,
+        vocab: "Vocab",
+        length: int = 100,
+        temperature: float = 0.6,
+        mode: str = "trigram",
+        use_model: bool = False,
+        model_alpha: float = 0.3,
+        cleanup: bool = True,
+    ) -> tuple[List[int], str, dict]:
+        """
+        Generate using corpus statistics (like Leo).
+        
+        This is the recommended mode for untrained models.
+        Pure resonance - no neural network weights needed.
+        
+        Args:
+            seed_seq: initial token indices
+            corpus_text: text corpus for building statistics
+            vocab: vocabulary for encoding
+            length: tokens to generate
+            temperature: sampling temperature (lower = more coherent)
+            mode: "bigram", "trigram", "cooccur", or "blend"
+            use_model: if True, blend model logits with corpus (requires trained weights)
+            model_alpha: blend ratio when use_model=True (0=corpus, 1=model)
+            cleanup: if True, clean up output punctuation
+        
+        Returns:
+            (tokens, text, stats)
+        """
+        try:
+            from .cooccur import CooccurField
+        except ImportError:
+            from cooccur import CooccurField
+        
+        # Build co-occurrence field
+        field = CooccurField.from_text(corpus_text, vocab, window_size=5)
+        
+        tokens = list(seed_seq)
+        
+        for _ in range(length):
+            if use_model and len(tokens) > 0:
+                # Hybrid: model + corpus
+                idx_seq = np.array(tokens[-self.T:], dtype=np.int32)
+                logits = self.logits(idx_seq)[-1]
+                
+                # Bias with corpus
+                biased = field.bias_logits(logits, tokens, alpha=1.0-model_alpha, mode=mode)
+                
+                # Sample
+                probs = softmax(biased / temperature)
+                next_token = int(self.rng.choice(self.vocab_size, p=probs))
+            else:
+                # Pure corpus generation
+                next_token = field.sample_from_corpus(tokens, temperature=temperature, mode=mode)
+            
+            tokens.append(next_token)
+        
+        # Decode
+        text = vocab.decode(tokens)
+        
+        # Cleanup output
+        if cleanup:
+            try:
+                from .cleanup import cleanup_output
+            except ImportError:
+                from cleanup import cleanup_output
+            text = cleanup_output(text, mode="gentle")
+        
+        stats = {
+            "mode": mode,
+            "use_model": use_model,
+            "temperature": temperature,
+            "field_stats": field.stats(),
+        }
+        
+        return tokens, text, stats
 
     # ----- weight loading/saving -----
 
