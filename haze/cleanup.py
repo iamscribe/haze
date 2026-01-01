@@ -181,7 +181,20 @@ def cleanup_output(text: str, mode: str = "gentle") -> str:
     result = re.sub(rf"\bwho{apos}\s+", "who’s ", result, flags=re.IGNORECASE)
     
     # "don" + space + verb → "don't" + verb (common broken pattern)
-    result = re.sub(r"\bdon\s+(believe|think|know|want|need|like|care|worry|mind|understand|remember|forget|see|hear|feel)\b", r"don’t \1", result, flags=re.IGNORECASE)
+    # "don" + space + verb → "don't" + verb (common broken pattern)
+    # PART 1: Hardcoded common verbs
+    result = re.sub(r"\bdon\s+(believe|think|know|want|need|like|care|worry|mind|understand|remember|forget|see|hear|feel|get|go|do|be|have|make|take|give|say|tell|ask|try|look|come|put|let|seem|mean|stop|start|die|live|stay|leave|keep|wait|work|play|sleep|eat|drink|read|write|watch|listen|touch|hurt|cry|laugh|love|hate|miss|trust)\b", r"don't \1", result, flags=re.IGNORECASE)
+    
+    # PART 2: Heuristic by word endings (catches words not in hardcoded list)
+    # -ing endings: trying, dying, living, waiting, working, etc.
+    result = re.sub(r"\bdon\s+(\w+ing)\b", r"don't \1", result, flags=re.IGNORECASE)
+    # -ed endings (adjectives/participles): tired, bored, scared, worried, etc.
+    result = re.sub(r"\bdon\s+(\w+ed)\b", r"don't \1", result, flags=re.IGNORECASE)
+    # -en endings (participles): forgotten, broken, taken, etc.
+    result = re.sub(r"\bdon\s+(\w+en)\b", r"don't \1", result, flags=re.IGNORECASE)
+    
+    # Same for "won" → "won't"
+    result = re.sub(r"\bwon\s+(\w+ing|\w+ed|believe|think|know|want|need|like|go|do|be|have|make|say|tell|try|stop|wait|work)\b", r"won't \1", result, flags=re.IGNORECASE)
     
     # "they" + "my" (missing 're) → "they’re my"
     result = re.sub(r"\bthey\s+my\b", "they’re my", result, flags=re.IGNORECASE)

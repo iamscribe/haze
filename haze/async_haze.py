@@ -6,6 +6,7 @@
 #   2. Overthinking: three rings that enrich the field
 #   3. Lexicon: absorbs user vocabulary
 #   4. Generation: pure resonance from enriched field
+#   5. MathBrain: field perception and temperature tuning
 #
 # Based on Leo's async pattern - achieves coherence through explicit discipline.
 # "The asyncio.Lock doesn't add information—it adds discipline."
@@ -33,7 +34,9 @@ try:
     from .experts import route_to_mixture, pulse_to_signals, describe_mixture, ExpertMixture
     from .trauma import AsyncTrauma, TraumaState, TraumaInfluence, get_identity_prefix
     from .subword_field import SubwordField, AsyncSubwordField
+    from .mathbrain import AsyncMathBrain, FieldPerception
     HAS_SUBWORD = True
+    HAS_MATHBRAIN = True
 except ImportError:
     try:
         from haze import Vocab, PostGPT, load_corpus
@@ -45,9 +48,12 @@ except ImportError:
         from experts import route_to_mixture, pulse_to_signals, describe_mixture, ExpertMixture
         from trauma import AsyncTrauma, TraumaState, TraumaInfluence, get_identity_prefix
         from subword_field import SubwordField, AsyncSubwordField
+        from mathbrain import AsyncMathBrain, FieldPerception
         HAS_SUBWORD = True
+        HAS_MATHBRAIN = True
     except ImportError:
         HAS_SUBWORD = False
+        HAS_MATHBRAIN = False
 
 try:
     import aiosqlite
@@ -70,6 +76,7 @@ class HazeResponse:
     expert_mixture: Optional[ExpertMixture] = None
     trauma: Optional[TraumaState] = None
     trauma_influence: Optional[TraumaInfluence] = None
+    brain_perception: Optional["FieldPerception"] = None  # MathBrain perception
     
     def __repr__(self) -> str:
         preview = self.text[:50] + "..." if len(self.text) > 50 else self.text
