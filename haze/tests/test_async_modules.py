@@ -310,9 +310,11 @@ class TestSubwordField:
     def test_build_from_corpus(self, tmp_path):
         """Can build field from corpus."""
         try:
-            from haze.subword_field import SubwordField
+            import sentencepiece
         except ImportError:
             pytest.skip("sentencepiece not installed")
+        
+        from haze.subword_field import SubwordField
         
         # Create temp corpus with enough data
         corpus = tmp_path / "corpus.txt"
@@ -328,9 +330,11 @@ class TestSubwordField:
     def test_generate(self, tmp_path):
         """Generation produces text."""
         try:
-            from haze.subword_field import SubwordField
+            import sentencepiece
         except ImportError:
             pytest.skip("sentencepiece not installed")
+        
+        from haze.subword_field import SubwordField
         
         # Create temp corpus with enough data
         corpus = tmp_path / "corpus.txt"

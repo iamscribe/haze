@@ -77,6 +77,12 @@ try:
 except ImportError:
     HAS_MATHBRAIN = False
 
+# Import MetaHaze (dual generation, self-curation — Haze's inner voice)
+from .metahaze import (
+    MetaHaze, AsyncMetaHaze, MetaConfig,
+    GenerationCandidate, MetaResponse, METAHAZE_BOOTSTRAP
+)
+
 # Backwards compatibility aliases
 Haze = PostGPT
 ReweightGPT = PostGPT
@@ -146,4 +152,11 @@ __all__ = [
     'AsyncMathBrain',
     'FieldPerception',
     'HAS_MATHBRAIN',
+    # MetaHaze (inner voice, self-curation) - inspired by Leo's MetaLeo
+    'MetaHaze',
+    'AsyncMetaHaze',
+    'MetaConfig',
+    'GenerationCandidate',
+    'MetaResponse',
+    'METAHAZE_BOOTSTRAP',
 ]
