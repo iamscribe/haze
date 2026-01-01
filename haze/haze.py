@@ -1,4 +1,4 @@
-# model.py — Reweight-GPT with Hybrid Attention (NumPy inference)
+# haze.py — Haze: Hybrid Attention Entropy System (NumPy inference)
 #
 # Architecture:
 #   - HybridHead = ReweightHead (positional) + ContentHead (semantic)
@@ -269,15 +269,17 @@ class Block:
 # ----------------- model -----------------
 
 
-class ReweightGPT:
+class PostGPT:
     """
-    Reweight-GPT: character-level language model with hybrid attention.
-    
-    Features:
+    PostGPT: post-transformer hybrid attention language model.
+
+    Character-level model with:
     - Hybrid heads (reweight + content attention)
     - Pre-norm blocks with GELU
     - Entropy-aware adaptive temperature
     - Multiple sampling strategies
+
+    Part of the Haze ecosystem (Hybrid Attention Entropy System).
     """
 
     def __init__(
@@ -531,7 +533,7 @@ class ReweightGPT:
     # ----- weight loading/saving -----
 
     @classmethod
-    def theweightofhaze(cls, vocab_size: int, path: str | Path) -> "ReweightGPT":
+    def theweightofhaze(cls, vocab_size: int, path: str | Path) -> "PostGPT":
         """
         Load weights from .npz file.
         
@@ -587,7 +589,7 @@ class ReweightGPT:
         return model
     
     @classmethod
-    def from_npz(cls, vocab_size: int, path: str | Path) -> "ReweightGPT":
+    def from_npz(cls, vocab_size: int, path: str | Path) -> "PostGPT":
         """Alias for theweightofhaze() for backward compatibility."""
         return cls.theweightofhaze(vocab_size, path)
     
@@ -656,7 +658,7 @@ def build_model_from_text(
     """Build model and vocab from text file."""
     text = load_corpus(path)
     vocab = Vocab.from_text(text)
-    model = ReweightGPT(
+    model = PostGPT(
         vocab_size=vocab.vocab_size,
         T=T,
         n_emb=n_emb,

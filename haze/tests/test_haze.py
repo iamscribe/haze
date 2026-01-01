@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# tests/test_haze.py — Tests for model.py module
+# tests/test_haze.py — Tests for haze module
 
 import unittest
 import numpy as np
@@ -9,7 +9,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import model as haze
+from haze import Vocab, PostGPT, ReweightHead, ContentHead, HybridHead, Block, load_corpus, build_model_from_text
 import nn
 
 
@@ -19,14 +19,14 @@ class TestVocab(unittest.TestCase):
     def test_from_text(self):
         """Test vocabulary creation from text."""
         text = "hello world"
-        vocab = haze.Vocab.from_text(text)
-        self.assertIsInstance(vocab, haze.Vocab)
+        vocab = Vocab.from_text(text)
+        self.assertIsInstance(vocab, Vocab)
         self.assertGreater(vocab.vocab_size, 0)
     
     def test_encode_decode(self):
         """Test encode/decode round-trip."""
         text = "hello world"
-        vocab = haze.Vocab.from_text(text)
+        vocab = Vocab.from_text(text)
         encoded = vocab.encode("hello")
         decoded = vocab.decode(encoded)
         self.assertEqual(decoded, "hello")
@@ -34,7 +34,7 @@ class TestVocab(unittest.TestCase):
     def test_lowercase_conversion(self):
         """Test that vocab converts to lowercase."""
         text = "Hello World"
-        vocab = haze.Vocab.from_text(text)
+        vocab = Vocab.from_text(text)
         encoded = vocab.encode("HELLO")
         decoded = vocab.decode(encoded)
         self.assertEqual(decoded, "hello")
@@ -42,7 +42,7 @@ class TestVocab(unittest.TestCase):
     def test_unknown_chars(self):
         """Test handling of unknown characters."""
         text = "abc"
-        vocab = haze.Vocab.from_text(text)
+        vocab = Vocab.from_text(text)
         # 'x' is not in vocab
         encoded = vocab.encode("x")
         self.assertEqual(len(encoded), 0)
@@ -50,7 +50,7 @@ class TestVocab(unittest.TestCase):
     def test_vocab_size(self):
         """Test vocab size calculation."""
         text = "aabbcc"
-        vocab = haze.Vocab.from_text(text)
+        vocab = Vocab.from_text(text)
         self.assertEqual(vocab.vocab_size, 3)  # a, b, c
 
 
@@ -62,7 +62,7 @@ class TestReweightHead(unittest.TestCase):
         self.n_emb = 16
         self.head_dim = 8
         self.T = 10
-        self.head = haze.ReweightHead(self.n_emb, self.head_dim, self.T, self.rng)
+        self.head = ReweightHead(self.n_emb, self.head_dim, self.T, self.rng)
     
     def test_forward_shape(self):
         """Test forward pass returns correct shape."""
@@ -85,7 +85,7 @@ class TestContentHead(unittest.TestCase):
         self.n_emb = 16
         self.head_dim = 8
         self.T = 10
-        self.head = haze.ContentHead(self.n_emb, self.head_dim, self.T, self.rng)
+        self.head = ContentHead(self.n_emb, self.head_dim, self.T, self.rng)
     
     def test_forward_shape(self):
         """Test forward pass returns correct shape."""
@@ -108,7 +108,7 @@ class TestHybridHead(unittest.TestCase):
         self.n_emb = 16
         self.head_dim = 8
         self.T = 10
-        self.head = haze.HybridHead(self.n_emb, self.head_dim, self.T, self.rng, alpha=0.5)
+        self.head = HybridHead(self.n_emb, self.head_dim, self.T, self.rng, alpha=0.5)
     
     def test_forward_shape(self):
         """Test forward pass returns correct shape."""
@@ -132,7 +132,7 @@ class TestBlock(unittest.TestCase):
     
     def test_block_hybrid_forward(self):
         """Test hybrid block forward pass."""
-        block = haze.Block(
+        block = Block(
             self.n_emb, self.T, self.nodes, self.rng,
             n_heads=4, head_type="hybrid"
         )
@@ -142,7 +142,7 @@ class TestBlock(unittest.TestCase):
     
     def test_block_reweight_forward(self):
         """Test reweight-only block forward pass."""
-        block = haze.Block(
+        block = Block(
             self.n_emb, self.T, self.nodes, self.rng,
             n_heads=4, head_type="reweight"
         )
@@ -152,7 +152,7 @@ class TestBlock(unittest.TestCase):
     
     def test_block_content_forward(self):
         """Test content-only block forward pass."""
-        block = haze.Block(
+        block = Block(
             self.n_emb, self.T, self.nodes, self.rng,
             n_heads=4, head_type="content"
         )
@@ -168,7 +168,7 @@ class TestReweightGPT(unittest.TestCase):
         self.vocab_size = 20
         self.T = 16
         self.n_emb = 32
-        self.model = haze.ReweightGPT(
+        self.model = PostGPT(
             vocab_size=self.vocab_size,
             T=self.T,
             n_emb=self.n_emb,
@@ -312,7 +312,7 @@ class TestReweightGPT(unittest.TestCase):
             self.assertTrue(os.path.exists(temp_path))
             
             # load weights
-            loaded_model = haze.ReweightGPT.theweightofhaze(
+            loaded_model = PostGPT.theweightofhaze(
                 vocab_size=self.vocab_size,
                 path=temp_path
             )
@@ -339,7 +339,7 @@ class TestModelVariants(unittest.TestCase):
     
     def test_reweight_only_model(self):
         """Test model with only reweight heads."""
-        model = haze.ReweightGPT(
+        model = PostGPT(
             vocab_size=20,
             T=16,
             n_emb=32,
@@ -355,7 +355,7 @@ class TestModelVariants(unittest.TestCase):
     
     def test_content_only_model(self):
         """Test model with only content heads."""
-        model = haze.ReweightGPT(
+        model = PostGPT(
             vocab_size=20,
             T=16,
             n_emb=32,
@@ -371,7 +371,7 @@ class TestModelVariants(unittest.TestCase):
     
     def test_hybrid_model(self):
         """Test model with hybrid heads."""
-        model = haze.ReweightGPT(
+        model = PostGPT(
             vocab_size=20,
             T=16,
             n_emb=32,
@@ -399,7 +399,7 @@ class TestHelpers(unittest.TestCase):
             temp_path = f.name
         
         try:
-            corpus = haze.load_corpus(temp_path)
+            corpus = load_corpus(temp_path)
             self.assertEqual(corpus, "test corpus")
         finally:
             os.remove(temp_path)
@@ -412,7 +412,7 @@ class TestHelpers(unittest.TestCase):
             temp_path = f.name
         
         try:
-            text, vocab, model = haze.build_model_from_text(
+            text, vocab, model = build_model_from_text(
                 temp_path,
                 T=16,
                 n_emb=32,
@@ -421,8 +421,8 @@ class TestHelpers(unittest.TestCase):
                 n_heads=4,
             )
             self.assertIsInstance(text, str)
-            self.assertIsInstance(vocab, haze.Vocab)
-            self.assertIsInstance(model, haze.ReweightGPT)
+            self.assertIsInstance(vocab, Vocab)
+            self.assertIsInstance(model, PostGPT)
             self.assertEqual(model.vocab_size, vocab.vocab_size)
         finally:
             os.remove(temp_path)
@@ -435,10 +435,10 @@ class TestEndToEnd(unittest.TestCase):
         """Test complete text generation pipeline."""
         # Create corpus
         text = "the quick brown fox jumps over the lazy dog"
-        vocab = haze.Vocab.from_text(text)
+        vocab = Vocab.from_text(text)
         
         # Build model
-        model = haze.ReweightGPT(
+        model = PostGPT(
             vocab_size=vocab.vocab_size,
             T=16,
             n_emb=32,

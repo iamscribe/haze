@@ -61,9 +61,9 @@ def extract_reweight_attention(
         if i == block_idx:
             # compute attention for this block
             try:
-                from .model import layer_norm, softmax
+                from .haze import layer_norm, softmax
             except ImportError:
-                from model import layer_norm, softmax
+                from haze import layer_norm, softmax
             x_norm = layer_norm(x, blk.ln1_gamma, blk.ln1_beta)
             
             # get attention matrix from reweight head
@@ -360,11 +360,11 @@ if __name__ == "__main__":
     print()
     print("Usage:")
     print("  from hallucinations import hallucinate")
-    print("  from model import Vocab, ReweightGPT as Haze")
+    print("  from haze import Vocab, PostGPT")
     print()
     print("  text = open('text.txt').read()")
     print("  vocab = Vocab.from_text(text)")
-    print("  model = Haze(vocab_size=vocab.vocab_size, T=32, n_emb=64)")
+    print("  model = PostGPT(vocab_size=vocab.vocab_size, T=32, n_emb=64)")
     print()
     print("  # analyze attention patterns")
     print("  patterns = hallucinate(model, 'the haze settles', vocab)")

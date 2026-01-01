@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-# example.py — Quick demo of Reweight-GPT
+# example.py — Quick demo of Haze
 #
 # Shows different sampling strategies and entropy-aware generation.
 # Run: python example.py
 
 from __future__ import annotations
 import numpy as np
-from model import Vocab, ReweightGPT as Haze
+from haze import Vocab, PostGPT
 
 # ----------------- corpus -----------------
 
@@ -30,7 +30,7 @@ patterns we forgot we already knew.
 
 def main():
     print("=" * 60)
-    print("  Reweight-GPT — Demo")
+    print("  Haze — Demo")
     print("=" * 60)
     print()
 
@@ -38,7 +38,7 @@ def main():
     vocab = Vocab.from_text(DEMO_TEXT)
     print(f"[vocab] {vocab.vocab_size} unique characters")
 
-    model = Haze(
+    model = PostGPT(
         vocab_size=vocab.vocab_size,
         T=32,
         n_emb=64,
@@ -89,7 +89,7 @@ def main():
     print()
 
     for head_type in ["reweight", "content", "hybrid"]:
-        model_test = Haze(
+        model_test = PostGPT(
             vocab_size=vocab.vocab_size,
             T=32,
             n_emb=64,

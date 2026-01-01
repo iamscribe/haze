@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # haze/__init__.py — package initialization
 
-from .model import (
+from .haze import (
     Vocab,
-    ReweightGPT,
+    PostGPT,
     ReweightHead,
     ContentHead,
     HybridHead,
@@ -12,13 +12,15 @@ from .model import (
     build_model_from_text,
 )
 
-# Alias for the new naming convention
-Haze = ReweightGPT
+# Backwards compatibility aliases
+Haze = PostGPT
+ReweightGPT = PostGPT
 
 __all__ = [
     'Vocab',
-    'ReweightGPT',
-    'Haze',
+    'PostGPT',
+    'Haze',  # alias
+    'ReweightGPT',  # backwards compat
     'ReweightHead',
     'ContentHead',
     'HybridHead',
