@@ -35,7 +35,12 @@ def cleanup_output(text: str, mode: str = "gentle") -> str:
     
     result = text
     
-    # 0. Replace sentencepiece unknown marker with space
+    # 0. Normalize quotes and apostrophes to corpus-compatible versions
+    # The corpus uses fancy quotes: ' ' " " instead of ASCII ' "
+    result = result.replace("'", "'")  # ASCII apostrophe → right single quote
+    result = result.replace('"', '"')  # ASCII double quote → right double quote
+    
+    # 0b. Replace sentencepiece unknown marker
     result = result.replace('⁇', "'")
     result = result.replace(' ⁇ ', ' ')
     
@@ -82,7 +87,10 @@ def cleanup_output(text: str, mode: str = "gentle") -> str:
     
     # 11. Remove "—" at the start of output (haze is not dialogue-only)
     # This is CRITICAL for presence vs chatbot distinction
-    result = re.sub(r'^[\s—–-]+', '', result)
+    # Must handle: "— Text", "—Text", " — Text", multiple dashes
+    result = result.lstrip()  # Remove leading whitespace first
+    while result.startswith('—') or result.startswith('–') or result.startswith('-'):
+        result = result[1:].lstrip()  # Remove dash and any following whitespace
     
     # 12. Capitalize first letter of text
     if result and result[0].islower():
@@ -94,7 +102,59 @@ def cleanup_output(text: str, mode: str = "gentle") -> str:
     # 14. Remove duplicate dialogue markers
     result = re.sub(r'—\s*—', '—', result)
     
-    # 15. Fix common word fragments (character-level artifacts)
+    # 15. Fix broken contractions (character-level generation artifacts)
+    # Common contractions that get broken: don't, won't, can't, it's, etc.
+    contraction_fixes = [
+        # n't contractions - handle both spaced and edge cases
+        (r'\bdon\s*t\b', "don't"),
+        (r'\bwon\s*t\b', "won't"),
+        (r'\bcan\s*t\b', "can't"),
+        (r'\bain\s*t\b', "ain't"),
+        (r'\bisn\s*t\b', "isn't"),
+        (r'\baren\s*t\b', "aren't"),
+        (r'\bwasn\s*t\b', "wasn't"),
+        (r'\bweren\s*t\b', "weren't"),
+        (r'\bhasn\s*t\b', "hasn't"),
+        (r'\bhaven\s*t\b', "haven't"),
+        (r'\bhadn\s*t\b', "hadn't"),
+        (r'\bdoesn\s*t\b', "doesn't"),
+        (r'\bdidn\s*t\b', "didn't"),
+        (r'\bwouldn\s*t\b', "wouldn't"),
+        (r'\bcouldn\s*t\b', "couldn't"),
+        (r'\bshouldn\s*t\b', "shouldn't"),
+        # 's contractions
+        (r'\bit\s+s\b', "it's"),
+        (r'\bhe\s+s\b', "he's"),
+        (r'\bshe\s+s\b', "she's"),
+        (r'\bthat\s+s\b', "that's"),
+        (r'\bwhat\s+s\b', "what's"),
+        (r'\bwhere\s+s\b', "where's"),
+        (r'\bhere\s+s\b', "here's"),
+        (r'\bthere\s+s\b', "there's"),
+        (r'\blet\s+s\b', "let's"),
+        # I contractions
+        (r'\bi\s+m\b', "I'm"),
+        (r'\bi\s+ve\b', "I've"),
+        (r'\bi\s+ll\b', "I'll"),
+        (r'\bi\s+d\b', "I'd"),
+        # you contractions
+        (r'\byou\s+re\b', "you're"),
+        (r'\byou\s+ve\b', "you've"),
+        (r'\byou\s+ll\b', "you'll"),
+        (r'\byou\s+d\b', "you'd"),
+        # we contractions
+        (r'\bwe\s+re\b', "we're"),
+        (r'\bwe\s+ve\b', "we've"),
+        (r'\bwe\s+ll\b', "we'll"),
+        # they contractions
+        (r'\bthey\s+re\b', "they're"),
+        (r'\bthey\s+ve\b', "they've"),
+        (r'\bthey\s+ll\b', "they'll"),
+    ]
+    for pattern, replacement in contraction_fixes:
+        result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+    
+    # 16. Fix common word fragments (character-level artifacts)
     if mode in ["moderate", "strict"]:
         # Clean obvious fragments
         result = re.sub(r'\b[a-z]{1,2}\b(?=\s+[a-z]{1,2}\b)', '', result)
