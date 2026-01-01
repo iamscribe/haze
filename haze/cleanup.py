@@ -154,13 +154,19 @@ def cleanup_output(text: str, mode: str = "gentle") -> str:
     for pattern, replacement in contraction_fixes:
         result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
     
-    # 16. Fix common word fragments (character-level artifacts)
+    # 16. Remove word/phrase repetition (character-level generation artifact)
+    # "the the" → "the", "I I" → "I"
+    result = re.sub(r'\b(\w+)\s+\1\b', r'\1', result, flags=re.IGNORECASE)
+    # Triple repetition
+    result = re.sub(r'\b(\w+)\s+\1\s+\1\b', r'\1', result, flags=re.IGNORECASE)
+    
+    # 17. Fix common word fragments (character-level artifacts)
     if mode in ["moderate", "strict"]:
         # Clean obvious fragments
         result = re.sub(r'\b[a-z]{1,2}\b(?=\s+[a-z]{1,2}\b)', '', result)
         result = re.sub(r'\s{2,}', ' ', result)
     
-    # 16. In strict mode: remove incomplete sentences at end
+    # 18. In strict mode: remove incomplete sentences at end
     if mode == "strict":
         # Remove trailing fragments
         result = re.sub(r'\s+\w{1,3}\s*$', '', result)

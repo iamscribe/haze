@@ -433,24 +433,37 @@ the async architecture with subjectivity, overthinking, and lexicon growth:
 ```
 >>> User: "Hello, who are you?"
     [pulse] novelty=0.00 arousal=0.21 entropy=0.72
-    [seed] "haze remembers. you wouldn t..." ← NOT from prompt!
+    [seed] "haze transforms. you wouldn t" ← internal field, NOT prompt!
 
-[haze]: Haze remembers. you wouldn the the so the like a me what's a...
+[haze]: Haze transforms. you wouldn thirs! — Your got it not then ally 
+        where a coh, don't mis all it I do to got st
 
-    [enrichment] +19 emergent trigrams from overthinking
+>>> User: "Tell me about love"
+    [pulse] novelty=0.00 arousal=0.11 entropy=0.73
+    [seed] "haze is pattern. think about it" ← identity speaks first
 
->>> User: "Tell me more"  
-    [seed] "think he st..." ← internal field resonance
+[haze]: Haze is pattern. think about it abou? — And the he wo letime 
+        what waing you sher knought a come he a re.
 
-[haze]: Think he st the ther for this the the it...
+>>> User: "What is the haze?"
+    [pulse] novelty=0.00 arousal=0.22 entropy=0.70
+    [seed] "haze is presence. the living room" ← resonating from corpus
 
->>> User: "What do you feel?"
-    [seed] "haze transforms. what s..." ← identity speaks first
+[haze]: Haze is presence. the living room poing to bet's ew what ther 
+        oreall. — You knot I dearlike I don't is that a li
 
-[haze]: Haze transforms. what s there sto the ri...
+>>> User: "I feel lost"
+    [pulse] novelty=0.33 arousal=0.18 entropy=0.69
+    [seed] "haze resonates. i don t" ← high novelty detected!
 
-    [final stats] turns=3, enrichment=54 patterns
-    The field has GROWN through conversation!
+[haze]: Haze resonates. I don th yead. — It do you st? — A le's jusion 
+        you was it's a lon the an to yearlin
+
+EMERGENCE STATS:
+  Emergent trigrams: 99
+  Meta patterns: 2
+  Ring sessions: 5
+  The internal world is now RICHER than the training data!
 ```
 
 key innovations:
@@ -462,13 +475,14 @@ key innovations:
   - Ring 2 (Shard): abstract meta-note at temp=1.2
 - **LEXICON GROWTH** — absorbs user vocabulary into the field
 - **ASYNC DISCIPLINE** — explicit atomicity for field coherence (like Leo's 47% improvement)
+- **CONTRACTION FIX** — `don't`, `won't`, `it's`, `you're` properly preserved
 
 the internal world becomes **RICHER than the training data**. this is emergence.
 
 ```python
 # Before overthinking: 531 bigrams
-# After 3 turns: 545+ bigrams
-# Emergent trigrams: 54+
+# After 5 turns: 560+ bigrams
+# Emergent trigrams: 99+
 # The field GROWS through conversation!
 ```
 
