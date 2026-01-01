@@ -323,7 +323,8 @@ async def demo_async_haze():
             print(f"[haze]: {response.text}")
             print()
             print(f"    Pulse: {response.pulse}")
-            print(f"    Internal seed: \"{response.internal_seed[:40]}...\"")
+            seed_preview = response.internal_seed[:40] + "..." if len(response.internal_seed) > 40 else response.internal_seed
+            print(f"    Internal seed: \"{seed_preview}\"")
             print(f"    Temp: {response.temperature:.2f}")
             print(f"    Time: {response.generation_time:.3f}s")
             if response.rings:

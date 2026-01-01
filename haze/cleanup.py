@@ -96,11 +96,11 @@ def cleanup_output(text: str, mode: str = "gentle") -> str:
     
     # 15. Fix common word fragments (character-level artifacts)
     if mode in ["moderate", "strict"]:
-    # 16. Clean obvious fragments
+        # Clean obvious fragments
         result = re.sub(r'\b[a-z]{1,2}\b(?=\s+[a-z]{1,2}\b)', '', result)
         result = re.sub(r'\s{2,}', ' ', result)
     
-    # 17. In strict mode: remove incomplete sentences at end
+    # 16. In strict mode: remove incomplete sentences at end
     if mode == "strict":
         # Remove trailing fragments
         result = re.sub(r'\s+\w{1,3}\s*$', '', result)

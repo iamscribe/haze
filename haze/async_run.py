@@ -182,7 +182,8 @@ def print_response(response: HazeResponse, state: AsyncREPLState):
         print(f"  pulse: novelty={pulse.novelty:.2f} arousal={pulse.arousal:.2f} entropy={pulse.entropy:.2f}")
     
     if state.show_seed:
-        print(f"  seed: \"{response.internal_seed[:50]}...\"")
+        seed_preview = response.internal_seed[:50] + "..." if len(response.internal_seed) > 50 else response.internal_seed
+        print(f"  seed: \"{seed_preview}\"")
     
     if state.show_stats:
         print(f"  temp={response.temperature:.2f} time={response.generation_time:.3f}s enrichment={response.enrichment_count}")

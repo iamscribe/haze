@@ -188,11 +188,12 @@ class Subjectivity:
         # Tokenize bootstrap
         words = re.findall(r'\b\w+\b', self.identity.bootstrap.lower())
         
-        # Extract phrases
-        for i in range(len(words) - 2):
-            phrase = f"{words[i]} {words[i+1]} {words[i+2]}"
-            if "haze" in phrase:
-                self.identity.add_pattern(phrase)
+        # Extract phrases (need at least 3 words)
+        if len(words) >= 3:
+            for i in range(len(words) - 2):
+                phrase = f"{words[i]} {words[i+1]} {words[i+2]}"
+                if "haze" in phrase:
+                    self.identity.add_pattern(phrase)
     
     def compute_pulse(self, text: str) -> PulseSnapshot:
         """

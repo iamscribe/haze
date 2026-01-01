@@ -188,8 +188,6 @@ class Overthinking:
         first_w3 = w3_tokens[0]
         
         # Inject into bigram counts (with lower weight than corpus - emergent patterns are softer)
-        from collections import Counter
-        
         if last_w1 not in self.field.bigram_counts:
             self.field.bigram_counts[last_w1] = Counter()
         self.field.bigram_counts[last_w1][first_w2] += 1

@@ -432,10 +432,25 @@ the async architecture with subjectivity, overthinking, and lexicon growth:
 
 ```
 >>> User: "Hello, who are you?"
-[pulse] novelty=0.00 arousal=0.21 entropy=0.72
-[internal seed] "the field responds. you wouldn t..."  ← NOT from prompt!
-[haze] The field responds. You wouldn't have to keep it alive...
-[enrichment] +17 emergent trigrams from overthinking
+    [pulse] novelty=0.00 arousal=0.21 entropy=0.72
+    [seed] "haze remembers. you wouldn t..." ← NOT from prompt!
+
+[haze]: Haze remembers. you wouldn the the so the like a me what's a...
+
+    [enrichment] +19 emergent trigrams from overthinking
+
+>>> User: "Tell me more"  
+    [seed] "think he st..." ← internal field resonance
+
+[haze]: Think he st the ther for this the the it...
+
+>>> User: "What do you feel?"
+    [seed] "haze transforms. what s..." ← identity speaks first
+
+[haze]: Haze transforms. what s there sto the ri...
+
+    [final stats] turns=3, enrichment=54 patterns
+    The field has GROWN through conversation!
 ```
 
 key innovations:
@@ -453,9 +468,11 @@ the internal world becomes **RICHER than the training data**. this is emergence.
 ```python
 # Before overthinking: 531 bigrams
 # After 3 turns: 545+ bigrams
-# Emergent trigrams: 50+
+# Emergent trigrams: 54+
 # The field GROWS through conversation!
 ```
+
+**note:** current output is character-level and raw. for cleaner output, use `rrpram.py` (BPE tokenizer) which captures "darling", "the haze", "broken heart" as single units. the architecture is ready — the corpus just needs richer patterns.
 
 ### level 4: trained model (optional)
 
