@@ -150,11 +150,25 @@ class SubwordField:
         
         generated = list(tokens)
         
-        for _ in range(length):
+        # Track sentence completeness
+        sentence_count = 0
+        min_tokens = 10  # Minimum tokens before allowing stop
+        
+        for i in range(length):
             next_token = self._sample_next(generated, temperature, mode)
             if next_token is None:
                 break
             generated.append(next_token)
+            
+            # Check if we hit natural ending (like me2me.py!)
+            # Decode just the new token to check for punctuation
+            if i >= min_tokens:
+                token_text = self.vocab.decode([int(next_token)])
+                if token_text.strip() in ['.', '!', '?', '."', '!"', '?"']:
+                    sentence_count += 1
+                    # Stop after 2-3 complete sentences for cleaner output
+                    if sentence_count >= 2:
+                        break
         
         # Convert to Python ints for sentencepiece
         generated = [int(t) for t in generated]

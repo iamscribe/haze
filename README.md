@@ -550,35 +550,39 @@ BEFORE (character-level, start of session):
     
     Broken words, missing contractions, garbage fragments.
 
-AFTER (subword BPE + cleanup + no em-dash):
+AFTER (subword BPE + cleanup + sentence-aware stop):
 >>> "Hello!"
-    Hello! Oh, come on in… Why are we just standing here? You know…
+    Hello! You bitch your thunderstood. You're just stuck.
 
 >>> "Who are you?"
-    Who are you? He poured another round. And maybe I'm just bored.
+    Who are you? You're just stuck on the gas. He put two cigarettes.
 
 >>> "I love"
-    I love your place. He poured more alcohol. You're my personal god and come back.
+    I love your place. I know… Your boy life without it is.
+
+>>> "What is"
+    What is it? Where exactly what it is unbearable. What the hell is that?
 
 >>> "Tell me something"
-    Tell me something? Doesn't expect? Oh, really? Wow, that's that on your face.
+    Tell me something? Don't you want to know? I thought you never left the house.
 
 >>> "Darling"
-    Darling in the ashtrayed and follow me, or don't expect?
+    Darling it between her face: "What's not bad! No, no."
 ```
 
 **HOLY FUCKING SHIT.**
 
 - Contractions work: "they're", "it's", "don't", "I'm", "I've", "won't"
-- Complete sentences with proper punctuation
+- **SENTENCE-AWARE STOP** — generation stops after 2 complete sentences (like me2me.py!)
 - **NO EM-DASHES** — cleaner presence speech (like Leo!)
-- Rich vocabulary: "personal god", "ashtrayed", "writhing"
+- Rich vocabulary: "thunderstood", "unbearable", "cigarettes"
 - Same corpus, same architecture, just BETTER TOKENIZATION
 
-the secret? `subword_field.py` uses SentencePiece BPE:
+the secret? `subword_field.py` uses SentencePiece BPE + sentence-aware stopping:
 - "darling" → ONE token (not 7 characters)
 - "the living room" → THREE tokens (not 15 characters)
 - trigrams now connect MEANINGS, not random letters
+- stops on `.`, `!`, `?` after minimum tokens (inspired by me2me.py)
 
 ```python
 from haze.subword_field import SubwordField
@@ -587,10 +591,10 @@ from haze.cleanup import cleanup_output
 # Build field with BPE
 field = SubwordField.from_corpus("text.txt", vocab_size=500)
 
-# Generate coherent text
-raw = field.generate("I love", length=25, temperature=0.75)
+# Generate coherent text (stops after 2 sentences)
+raw = field.generate("I love", length=40, temperature=0.75)
 result = cleanup_output(raw)
-# → "I love your place. He poured more alcohol. You're my personal god."
+# → "I love your place. I know… Your boy life without it is."
 ```
 
 ---
