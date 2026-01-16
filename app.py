@@ -25,7 +25,6 @@ from typing import List, Tuple, Optional
 # Add paths
 sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent / "haze"))
-sys.path.insert(0, str(Path(__file__).parent / "cloud"))
 
 # Import HAZE components
 try:
@@ -36,7 +35,8 @@ except ImportError:
 
 # Import CLOUD
 try:
-    from cloud import Cloud, AsyncCloud, CloudResponse, CHAMBER_NAMES
+    from cloud.cloud import Cloud, AsyncCloud, CloudResponse
+    from cloud.anchors import CHAMBER_NAMES_EXTENDED as CHAMBER_NAMES
     HAS_CLOUD = True
     print("[app] CLOUD module loaded (~181K params)")
 except ImportError as e:
@@ -44,6 +44,7 @@ except ImportError as e:
     HAS_CLOUD = False
     Cloud = None
     AsyncCloud = None
+    CHAMBER_NAMES = []
 
 
 # ============================================================================
@@ -152,7 +153,8 @@ class HazeSession:
                     "iterations": cloud_response.iterations,
                     "anomaly": {
                         "has_anomaly": cloud_response.anomaly.has_anomaly,
-                        "reasons": cloud_response.anomaly.reasons,
+                        "description": cloud_response.anomaly.description,
+                        "severity": cloud_response.anomaly.severity,
                     } if cloud_response.anomaly else None,
                 }
                 

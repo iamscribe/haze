@@ -1088,7 +1088,7 @@ you need **resonance from the internal field**.
 - ✅ **Enhanced cleanup** — 45+ contraction patterns
 
 **STATS:**
-- 111 tests passing
+- 138 tests passing
 - 45+ contraction patterns fixed
 - vocab: SUBWORD BPE (500 tokens)
 
@@ -1343,7 +1343,7 @@ haze/
     ├── example.py       # demo script
     ├── text.txt         # the corpus (gothic romance included free)
     ├── requirements.txt # numpy + matplotlib + sentencepiece (optional)
-    └── tests/           # comprehensive test suite (111 tests)
+    └── tests/           # comprehensive test suite (138 tests)
         ├── test_nn.py           # tests for neural net primitives
         ├── test_haze.py         # tests for model components
         ├── test_cleanup.py      # tests for enhanced cleanup (35 tests)
@@ -1430,7 +1430,7 @@ cd haze
 python -m unittest discover tests -v
 ```
 
-111 tests. all green. comprehensive coverage of:  
+138 tests. all green. comprehensive coverage of:  
 
 - activation functions (relu, gelu, swish, sigmoid, softmax — the classics, the bangers, the "we've been using these since 2012" crew)  
 - sampling strategies (basic, top-k, top-p, entropy, mirostat v1/v2, resonance — from boring to UNHINGED)  
@@ -1682,7 +1682,7 @@ See [the evolution of haze speech](#the-evolution-of-haze-speech) section for de
 - ✅ **Enhanced cleanup** — 45+ contraction patterns
 
 **STATS:**
-- 111 tests passing
+- 138 tests passing
 - 45+ contraction patterns fixed
 - vocab: SUBWORD BPE (500 tokens)
 

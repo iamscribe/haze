@@ -152,16 +152,22 @@ class ChamberMLP:
     def load(cls, path: Path) -> "ChamberMLP":
         """Load weights from .npz file."""
         data = np.load(path)
-        return cls(
-            W1=data["W1"],
-            b1=data["b1"],
-            W2=data["W2"],
-            b2=data["b2"],
-            W3=data["W3"],
-            b3=data["b3"],
-            W4=data["W4"],
-            b4=data["b4"],
-        )
+        # Handle backwards compatibility with old 3-layer architecture
+        if "W4" in data:
+            return cls(
+                W1=data["W1"],
+                b1=data["b1"],
+                W2=data["W2"],
+                b2=data["b2"],
+                W3=data["W3"],
+                b3=data["b3"],
+                W4=data["W4"],
+                b4=data["b4"],
+            )
+        else:
+            # Old 3-layer format - reinitialize with new 4-layer architecture
+            print(f"[chambers] old format detected in {path}, reinitializing with 4-layer architecture")
+            return cls.random_init()
 
 
 @dataclass
