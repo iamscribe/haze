@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('stats-panel').appendChild(barsDiv);
     }
     
+    // Response delay for visual feedback (milliseconds)
+    const RESPONSE_DELAY_MS = 100;
+    
     /**
      * Handle user message
      */
@@ -125,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 addMessage('system', `Error: ${e.message}`);
             }
-        }, 100); // Small delay for visual feedback
+        }, RESPONSE_DELAY_MS); // Small delay for visual feedback
     }
     
     // Event listeners

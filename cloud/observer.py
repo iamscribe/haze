@@ -177,7 +177,9 @@ class MetaObserver:
             )
         else:
             # Old format - reinitialize with new architecture
-            print(f"[observer] old format detected, reinitializing with new architecture")
+            # Note: Using seed=42 for deterministic backward compatibility
+            # This ensures consistent behavior when loading old model files
+            print(f"[observer] old format detected, reinitializing with new architecture (seed=42)")
             return cls.random_init(seed=42)
 
 

@@ -308,14 +308,19 @@ class Subjectivity:
         seed_parts = []
         
         # IDENTITY FRAGMENT PLACEMENT - Variable position for more life
-        # Options: prefix (30%), suffix (30%), middle (20%), none (20%)
+        # Probabilities defined as constants for maintainability
+        IDENTITY_PREFIX_PROB = 0.3   # 30% chance at start
+        IDENTITY_MIDDLE_PROB = 0.6   # 30% chance in middle (0.3-0.6)
+        IDENTITY_SUFFIX_PROB = 0.8   # 20% chance at end (0.6-0.8)
+        # Remaining 20% (0.8-1.0) = no identity fragment for natural variation
+        
         identity_placement = random.random()
         identity_fragment = random.choice(self.identity.fragments)
         
         # Flag to track if we should add identity
-        add_identity_prefix = identity_placement < 0.3
-        add_identity_suffix = 0.3 <= identity_placement < 0.6
-        add_identity_middle = 0.6 <= identity_placement < 0.8
+        add_identity_prefix = identity_placement < IDENTITY_PREFIX_PROB
+        add_identity_suffix = IDENTITY_PREFIX_PROB <= identity_placement < IDENTITY_MIDDLE_PROB
+        add_identity_middle = IDENTITY_MIDDLE_PROB <= identity_placement < IDENTITY_SUFFIX_PROB
         # 0.8-1.0 = no identity fragment (20% chance for natural variation)
         
         # Add identity at start if prefix mode
