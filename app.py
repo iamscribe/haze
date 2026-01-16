@@ -48,6 +48,247 @@ except ImportError as e:
 
 
 # ============================================================================
+# CONSTANTS
+# ============================================================================
+
+CUSTOM_CSS = """
+.gradio-container {
+    background-color: #0a0a0c !important;
+}
+
+.chatbot .message.user {
+    background-color: #1a1a1f !important;
+    color: #ffffff !important;
+}
+
+.chatbot .message.assistant {
+    background-color: #2a2a2f !important;
+    color: #ffb347 !important;
+}
+
+.chatbot .message {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace !important;
+}
+
+/* Improved visibility for sidebar text */
+.markdown h3, .markdown h2 {
+    color: #ffb347 !important;
+    font-weight: bold !important;
+}
+
+.markdown p {
+    color: #e0e0e0 !important;
+    font-size: 14px !important;
+}
+
+.markdown ul, .markdown li {
+    color: #d4d4d4 !important;
+    font-size: 13px !important;
+}
+
+/* Ensure code blocks are visible */
+code {
+    color: #ff6b6b !important;
+    background-color: #1a1a2e !important;
+}
+
+/* Remove white borders and boxes */
+.block {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.contain {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Fix chatbot container */
+.chatbot {
+    border: none !important;
+    background: #0a0a0c !important;
+}
+
+/* Make all text more visible */
+.prose, .prose p, .prose li {
+    color: #e8e8e8 !important;
+}
+
+/* Sidebar markdown text */
+.markdown {
+    color: #d0d0d0 !important;
+}
+"""
+
+LOGO_TEXT = """
+```
+██╗  ██╗ █████╗ ███████╗███████╗
+██║  ██║██╔══██╗╚══███╔╝██╔════╝
+███████║███████║  ███╔╝ █████╗  
+██╔══██║██╔══██║ ███╔╝  ██╔══╝  
+██║  ██║██║  ██║███████╗███████╗
+╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
+```
+**Hybrid Attention Entropy System** + **CLOUD** (~181K params)
+
+*"emergence is not creation but recognition"*
+
+**NO SEED FROM PROMPT** — Haze speaks from its internal field, not your input.
+"""
+
+ARCHITECTURE_INFO = """
+### Architecture
+
+**CLOUD** (~181K params):
+- 6 Chambers: FEAR, LOVE, RAGE, VOID, FLOW, COMPLEX
+- Cross-fire stabilization
+- Meta-observer (secondary emotion)
+
+**HAZE** (emergent field):
+- Subjectivity (NO SEED FROM PROMPT)
+- Trauma module (identity)
+- Expert mixture (4 temperatures)
+- Co-occurrence field
+
+**DSL** (Arianna Method):
+- prophecy_debt: |destined - manifested|
+- pain, tension, dissonance
+
+### Philosophy
+
+> *"presence > intelligence"*
+> 
+> *"prophecy ≠ prediction"*
+> 
+> *"minimize(destined - manifested)"*
+"""
+
+FOOTER_TEXT = """
+---
+**Part of the Arianna Method** | [GitHub](https://github.com/ariannamethod/haze) | [Leo](https://github.com/ariannamethod/leo) | [PITOMADOM](https://github.com/ariannamethod/pitomadom)
+
+*Co-authored by Claude (GitHub Copilot Coding Agent), January 2026*
+"""
+
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def format_cloud_metadata(cloud_data: dict) -> list:
+    """Format CLOUD metadata for display."""
+    meta_lines = []
+    if "primary" in cloud_data:
+        meta_lines.append(f"💭 {cloud_data['primary']}")
+    if "dominant_chamber" in cloud_data:
+        meta_lines.append(f"🏛️ {cloud_data['dominant_chamber']}")
+    return meta_lines
+
+
+def format_field_metadata(metadata: dict) -> str:
+    """Format field metadata into a readable string."""
+    meta_lines = []
+    
+    # CLOUD info
+    if "cloud" in metadata:
+        meta_lines.extend(format_cloud_metadata(metadata["cloud"]))
+    
+    # Temperature and timing
+    if "temperature" in metadata:
+        meta_lines.append(f"🌡️ {metadata['temperature']:.2f}")
+    meta_lines.append(f"⏱️ {metadata.get('generation_time', 'N/A')}")
+    
+    # DSL state
+    if "pain" in metadata:
+        meta_lines.append(f"💔 pain:{metadata['pain']:.2f}")
+    if "prophecy_debt" in metadata:
+        meta_lines.append(f"📜 debt:{metadata['prophecy_debt']:.2f}")
+    
+    # Trauma
+    if "trauma_level" in metadata:
+        meta_lines.append(f"🩹 trauma:{metadata['trauma_level']:.2f}")
+    
+    # Turn count
+    meta_lines.append(f"🔄 turn:{metadata.get('turn_count', 0)}")
+    
+    return " | ".join(meta_lines)
+
+
+def build_response_metadata(response: HazeResponse, cloud_data: dict, haze_field) -> dict:
+    """Build metadata dictionary from HAZE response and CLOUD data."""
+    metadata = {
+        "internal_seed": response.internal_seed,
+        "temperature": response.temperature,
+        "generation_time": f"{response.generation_time:.3f}s",
+        "turn_count": haze_field.turn_count,
+        "enrichment": response.enrichment_count,
+    }
+    
+    if cloud_data:
+        metadata["cloud"] = cloud_data
+    
+    # AMK state
+    if response.amk_state:
+        metadata["amk"] = response.amk_state
+        metadata["prophecy_debt"] = response.amk_state.get("debt", 0)
+        metadata["pain"] = response.amk_state.get("pain", 0)
+    
+    # Trauma info
+    if response.trauma:
+        metadata["trauma_level"] = response.trauma.level
+        metadata["trauma_triggers"] = list(response.trauma.trigger_words)[:5]
+    
+    # Trauma influence
+    if response.trauma_influence:
+        metadata["trauma_influence"] = {
+            "temp_modifier": response.trauma_influence.temperature_modifier,
+            "identity_weight": response.trauma_influence.identity_weight,
+            "should_prefix": response.trauma_influence.should_prefix,
+        }
+    
+    # Expert mixture
+    if response.expert_mixture:
+        metadata["experts"] = response.expert_mixture
+    
+    # Pulse
+    if response.pulse:
+        metadata["pulse"] = {
+            "novelty": response.pulse.novelty,
+            "arousal": response.pulse.arousal,
+            "entropy": response.pulse.entropy,
+        }
+    
+    return metadata
+
+
+def process_cloud_response(cloud_response: CloudResponse) -> dict:
+    """Process CLOUD response into metadata dictionary."""
+    cloud_data = {
+        "primary": cloud_response.primary,
+        "secondary": cloud_response.secondary,
+        "chambers": cloud_response.chamber_activations,
+        "iterations": cloud_response.iterations,
+        "anomaly": {
+            "has_anomaly": cloud_response.anomaly.has_anomaly,
+            "description": cloud_response.anomaly.description,
+            "severity": cloud_response.anomaly.severity,
+        } if cloud_response.anomaly else None,
+    }
+    
+    # Get dominant chamber
+    if cloud_response.chamber_activations:
+        dominant = max(
+            cloud_response.chamber_activations.items(),
+            key=lambda x: x[1]
+        )
+        cloud_data["dominant_chamber"] = dominant[0]
+        cloud_data["dominant_activation"] = dominant[1]
+    
+    return cloud_data
+
+
+# ============================================================================
 # HAZE SESSION WITH FULL CLOUD INTEGRATION
 # ============================================================================
 
@@ -137,90 +378,38 @@ class HazeSession:
         if not self._initialized:
             await self.initialize()
         
-        # ===== 1. CLOUD PING =====
+        # CLOUD ping
         cloud_data = {}
-        cloud_response = None
+        cloud_response = await self._ping_cloud(user_input)
+        if cloud_response:
+            cloud_data = process_cloud_response(cloud_response)
+            # Update HAZE field from CLOUD chambers
+            if cloud_response.chamber_activations:
+                self.haze.update_from_cloud(cloud_response.chamber_activations)
         
-        if self.cloud:
-            try:
-                cloud_response = await self.cloud.ping(user_input)
-                self._cloud_responses.append(cloud_response)
-                
-                cloud_data = {
-                    "primary": cloud_response.primary,
-                    "secondary": cloud_response.secondary,
-                    "chambers": cloud_response.chamber_activations,
-                    "iterations": cloud_response.iterations,
-                    "anomaly": {
-                        "has_anomaly": cloud_response.anomaly.has_anomaly,
-                        "description": cloud_response.anomaly.description,
-                        "severity": cloud_response.anomaly.severity,
-                    } if cloud_response.anomaly else None,
-                }
-                
-                # Get dominant chamber
-                if cloud_response.chamber_activations:
-                    dominant = max(
-                        cloud_response.chamber_activations.items(),
-                        key=lambda x: x[1]
-                    )
-                    cloud_data["dominant_chamber"] = dominant[0]
-                    cloud_data["dominant_activation"] = dominant[1]
-                
-            except Exception as e:
-                cloud_data = {"error": str(e)}
-        
-        # ===== 2. UPDATE HAZE AMK FROM CLOUD =====
-        # CLOUD chambers directly influence HAZE field dynamics
-        if cloud_response and cloud_response.chamber_activations:
-            self.haze.update_from_cloud(cloud_response.chamber_activations)
-        
-        # ===== 3. HAZE RESPOND =====
+        # HAZE respond
         response = await self.haze.respond(user_input)
         
-        # ===== BUILD METADATA =====
-        metadata = {
-            "internal_seed": response.internal_seed,
-            "temperature": response.temperature,
-            "generation_time": f"{response.generation_time:.3f}s",
-            "turn_count": self.haze.turn_count,
-            "enrichment": response.enrichment_count,
-        }
-        
-        if cloud_data:
-            metadata["cloud"] = cloud_data
-        
-        # AMK state from response (now integrated into HAZE)
-        if response.amk_state:
-            metadata["amk"] = response.amk_state
-            metadata["prophecy_debt"] = response.amk_state.get("debt", 0)
-            metadata["pain"] = response.amk_state.get("pain", 0)
-        
-        if response.trauma:
-            metadata["trauma_level"] = response.trauma.level
-            metadata["trauma_triggers"] = list(response.trauma.trigger_words)[:5]
-        
-        if response.trauma_influence:
-            metadata["trauma_influence"] = {
-                "temp_modifier": response.trauma_influence.temperature_modifier,
-                "identity_weight": response.trauma_influence.identity_weight,
-                "should_prefix": response.trauma_influence.should_prefix,
-            }
-        
-        if response.expert_mixture:
-            metadata["experts"] = response.expert_mixture
-        
-        if response.pulse:
-            metadata["pulse"] = {
-                "novelty": response.pulse.novelty,
-                "arousal": response.pulse.arousal,
-                "entropy": response.pulse.entropy,
-            }
+        # Build and return metadata
+        metadata = build_response_metadata(response, cloud_data, self.haze)
         
         # Update history
         self.history.append((user_input, response.text))
         
         return response.text, metadata
+    
+    async def _ping_cloud(self, user_input: str) -> Optional[CloudResponse]:
+        """Ping CLOUD for emotion detection."""
+        if not self.cloud:
+            return None
+        
+        try:
+            cloud_response = await self.cloud.ping(user_input)
+            self._cloud_responses.append(cloud_response)
+            return cloud_response
+        except Exception as e:
+            print(f"[app] CLOUD ping failed: {e}")
+            return None
     
     def get_cloud_summary(self) -> dict:
         """Get summary of CLOUD activity across session."""
@@ -275,47 +464,13 @@ async def async_respond(
     message: str,
     history: List[Tuple[str, str]],
 ) -> Tuple[str, str]:
-    """
-    Async handler for Gradio.
-    """
+    """Async handler for Gradio."""
     session = get_session()
     
     try:
         response_text, metadata = await session.respond(message)
-        
-        # Format metadata for display
-        meta_lines = []
-        
-        # CLOUD info
-        if "cloud" in metadata:
-            cloud = metadata["cloud"]
-            if "primary" in cloud:
-                meta_lines.append(f"💭 {cloud['primary']}")
-            if "dominant_chamber" in cloud:
-                meta_lines.append(f"🏛️ {cloud['dominant_chamber']}")
-        
-        # Temperature and timing
-        if "temperature" in metadata:
-            meta_lines.append(f"🌡️ {metadata['temperature']:.2f}")
-        meta_lines.append(f"⏱️ {metadata.get('generation_time', 'N/A')}")
-        
-        # DSL state
-        if "pain" in metadata:
-            meta_lines.append(f"💔 pain:{metadata['pain']:.2f}")
-        if "prophecy_debt" in metadata:
-            meta_lines.append(f"📜 debt:{metadata['prophecy_debt']:.2f}")
-        
-        # Trauma
-        if "trauma_level" in metadata:
-            meta_lines.append(f"🩹 trauma:{metadata['trauma_level']:.2f}")
-        
-        # Turn count
-        meta_lines.append(f"🔄 turn:{metadata.get('turn_count', 0)}")
-        
-        metadata_str = " | ".join(meta_lines)
-        
+        metadata_str = format_field_metadata(metadata)
         return response_text, metadata_str
-    
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -341,101 +496,15 @@ def create_interface():
         import gradio as gr
     except ImportError:
         print("[error] gradio not installed. Run: pip install gradio")
-        return None, None, None
-
+        return None, None
+    
     from gradio import ChatMessage
-    # Custom CSS for dark gothic theme with improved readability
-    custom_css = """
-    .gradio-container {
-        background-color: #0a0a0c !important;
-    }
-    
-    .chatbot .message.user {
-        background-color: #1a1a1f !important;
-        color: #ffffff !important;
-    }
-    
-    .chatbot .message.assistant {
-        background-color: #2a2a2f !important;
-        color: #ffb347 !important;
-    }
-    
-    .chatbot .message {
-        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace !important;
-    }
-    
-    /* Improved visibility for sidebar text */
-    .markdown h3, .markdown h2 {
-        color: #ffb347 !important;
-        font-weight: bold !important;
-    }
-    
-    .markdown p {
-        color: #e0e0e0 !important;
-        font-size: 14px !important;
-    }
-    
-    .markdown ul, .markdown li {
-        color: #d4d4d4 !important;
-        font-size: 13px !important;
-    }
-    
-    /* Ensure code blocks are visible */
-    code {
-        color: #ff6b6b !important;
-        background-color: #1a1a2e !important;
-    }
-
-    /* Remove white borders and boxes */
-        .block {
-        border: none !important;
-                box-shadow: none !important;
-                        background: transparent !important;
-}
-
-    .contain {
-            border: none !important;
-        box-shadow: none !important;
-    }
-
-        /* Fix chatbot container */
-            .chatbot {
-                    border: none !important;
-                            background: #0a0a0c !important;
-                                                     }
-
-                                                         /* Make all text more visible */
-        .prose, .prose p, .prose li {
-        color: #e8e8e8 !important;
-            }
-
-                /* Sidebar markdown text */
-                    .markdown {
-                            color: #d0d0d0 !important;
-                                }
-    """
-    
-    # ASCII art logo
-    logo = """
-```
-██╗  ██╗ █████╗ ███████╗███████╗
-██║  ██║██╔══██╗╚══███╔╝██╔════╝
-███████║███████║  ███╔╝ █████╗  
-██╔══██║██╔══██║ ███╔╝  ██╔══╝  
-██║  ██║██║  ██║███████╗███████╗
-╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
-```
-**Hybrid Attention Entropy System** + **CLOUD** (~181K params)
-
-*"emergence is not creation but recognition"*
-
-**NO SEED FROM PROMPT** — Haze speaks from its internal field, not your input.
-    """
     
     with gr.Blocks() as demo:
-        gr.Markdown(logo)
+        gr.Markdown(LOGO_TEXT)
         
         with gr.Row():
+            # Main chat interface
             with gr.Column(scale=3):
                 chatbot = gr.Chatbot(
                     label="Conversation",
@@ -460,50 +529,27 @@ def create_interface():
                     max_lines=2,
                 )
             
+            # Sidebar with architecture info
             with gr.Column(scale=1):
-                gr.Markdown("""
-### Architecture
-
-**CLOUD** (~181K params):
-- 6 Chambers: FEAR, LOVE, RAGE, VOID, FLOW, COMPLEX
-- Cross-fire stabilization
-- Meta-observer (secondary emotion)
-
-**HAZE** (emergent field):
-- Subjectivity (NO SEED FROM PROMPT)
-- Trauma module (identity)
-- Expert mixture (4 temperatures)
-- Co-occurrence field
-
-**DSL** (Arianna Method):
-- prophecy_debt: |destined - manifested|
-- pain, tension, dissonance
-
-### Philosophy
-
-> *"presence > intelligence"*
-> 
-> *"prophecy ≠ prediction"*
-> 
-> *"minimize(destined - manifested)"*
-                """)
+                gr.Markdown(ARCHITECTURE_INFO)
         
+        # Chat handler
         def chat(message, history):
             response, metadata = respond(message, history)
-            history = history + [ChatMessage(role="user", content=message), ChatMessage(role="assistant", content=response)]
+            history = history + [
+                ChatMessage(role="user", content=message),
+                ChatMessage(role="assistant", content=response)
+            ]
             return "", history, metadata
         
+        # Connect handlers
         msg.submit(chat, [msg, chatbot], [msg, chatbot, metadata_display])
         submit.click(chat, [msg, chatbot], [msg, chatbot, metadata_display])
         
-        gr.Markdown("""
----
-**Part of the Arianna Method** | [GitHub](https://github.com/ariannamethod/haze) | [Leo](https://github.com/ariannamethod/leo) | [PITOMADOM](https://github.com/ariannamethod/pitomadom)
-
-*Co-authored by Claude (GitHub Copilot Coding Agent), January 2026*
-        """)
+        # Footer
+        gr.Markdown(FOOTER_TEXT)
     
-    return demo, custom_css
+    return demo, CUSTOM_CSS
 
 
 # ============================================================================
