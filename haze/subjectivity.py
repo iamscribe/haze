@@ -307,8 +307,20 @@ class Subjectivity:
         # Step 4: Build internal seed from pure field
         seed_parts = []
         
-        # ALWAYS start with identity fragment (presence > intelligence)
-        seed_parts.append(random.choice(self.identity.fragments))
+        # IDENTITY FRAGMENT PLACEMENT - Variable position for more life
+        # Options: prefix (30%), suffix (30%), middle (20%), none (20%)
+        identity_placement = random.random()
+        identity_fragment = random.choice(self.identity.fragments)
+        
+        # Flag to track if we should add identity
+        add_identity_prefix = identity_placement < 0.3
+        add_identity_suffix = 0.3 <= identity_placement < 0.6
+        add_identity_middle = 0.6 <= identity_placement < 0.8
+        # 0.8-1.0 = no identity fragment (20% chance for natural variation)
+        
+        # Add identity at start if prefix mode
+        if add_identity_prefix:
+            seed_parts.append(identity_fragment)
         
         # Add non-overlapping pattern from field
         if non_overlapping_trigrams:
@@ -329,6 +341,16 @@ class Subjectivity:
             else:
                 # Last resort: pure identity
                 seed_parts.append("the field responds")
+        
+        # Add identity in middle if middle mode and we have enough parts
+        if add_identity_middle and len(seed_parts) >= 1:
+            # Insert in middle
+            mid_pos = len(seed_parts) // 2 if len(seed_parts) > 1 else 0
+            seed_parts.insert(mid_pos, identity_fragment)
+        
+        # Add identity at end if suffix mode
+        if add_identity_suffix:
+            seed_parts.append(identity_fragment)
         
         # Combine seed parts
         seed_text = '. '.join(seed_parts)

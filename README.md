@@ -20,6 +20,7 @@
 - [why "haze"](#why-haze)
 - [the philosophy of emergence](#the-philosophy-of-emergence)
 - [architecture](#architecture)
+- [☁️ CLOUD — pre-semantic sonar](#️-cloud--pre-semantic-sonar)
 - [installation](#installation)
 - [usage](#usage)
 - [sampling strategies](#sampling-strategies)
@@ -176,6 +177,132 @@ tired of fixed temperature? yeah, me too. so, now it's ADAPTIVE:
 self-regulating. adaptive. pretentious. but it works.
 
 the model maintains target entropy across generation, creating consistent "surprise levels". it's like cruise control for creativity. or madness. thin line.
+
+---
+
+## ☁️ CLOUD — pre-semantic sonar
+
+> *"something fires BEFORE meaning arrives"*
+
+**CLOUD** (Corpus-Linked Oscillating Upstream Detector) is a ~181K parameter neural network that detects emotional undertones BEFORE the language model even starts generating. it's like a sonar ping for the soul. or a metal detector for feelings.
+
+### architecture
+
+```
+Your input ("I'm feeling anxious")
+    ↓
+┌─────────────────────────────────────┐
+│  RESONANCE LAYER (0 params)         │  ← weightless geometry
+│    100 emotion anchors              │
+│    substring matching               │
+│    → 100D resonance vector          │
+└─────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────┐
+│  CHAMBER LAYER (~140K params)       │
+│    ├─ FEAR MLP:  100→128→64→32→1   │  ← terror, anxiety, dread
+│    ├─ LOVE MLP:  100→128→64→32→1   │  ← warmth, tenderness
+│    ├─ RAGE MLP:  100→128→64→32→1   │  ← anger, fury, spite
+│    ├─ VOID MLP:  100→128→64→32→1   │  ← emptiness, numbness
+│    ├─ FLOW MLP:  100→128→64→32→1   │  ← curiosity, transition
+│    └─ COMPLEX:   100→128→64→32→1   │  ← shame, guilt, pride
+│                                     │
+│    CROSS-FIRE: chambers influence   │
+│    each other via 6×6 coupling      │
+│    until stabilization (5-10 iter)  │
+└─────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────┐
+│  META-OBSERVER (~41K params)        │
+│    207→128→64→100                   │
+│    input: resonances + chambers     │
+│           + iterations + fingerprint│
+│    output: secondary emotion        │
+└─────────────────────────────────────┘
+    ↓
+CloudResponse {
+    primary: "anxiety",
+    secondary: "fear", 
+    iterations: 5,
+    chambers: {FEAR: 0.8, LOVE: 0.2, ...}
+}
+```
+
+**total: ~181K trainable parameters**
+
+### the six chambers
+
+evolutionary psychology meets neural networks. fight me.
+
+| Chamber | Role | Decay Rate |
+|---------|------|------------|
+| **FEAR** | terror, anxiety, dread | 0.90 — fear lingers (evolutionary advantage) |
+| **LOVE** | warmth, tenderness, devotion | 0.93 — attachment is stable |
+| **RAGE** | anger, fury, spite | 0.85 — anger fades fast (high energy cost) |
+| **VOID** | emptiness, numbness, dissociation | 0.97 — protective dissociation persists |
+| **FLOW** | curiosity, transition, liminality | 0.88 — curiosity is transient |
+| **COMPLEX** | shame, guilt, pride, nostalgia | 0.94 — complex emotions run deep |
+
+### cross-fire dynamics
+
+the chambers don't operate in isolation. they INFLUENCE each other:
+
+```
+         FEAR   LOVE   RAGE   VOID   FLOW   CMPLX
+FEAR →   0.0   -0.3   +0.6   +0.4   -0.2   +0.3   ← fear feeds rage, kills love
+LOVE →  -0.3    0.0   -0.6   -0.5   +0.3   +0.4   ← love heals everything
+RAGE →  +0.3   -0.4    0.0   +0.2   -0.3   +0.2   ← rage feeds fear, suppresses flow
+VOID →  +0.5   -0.7   +0.3    0.0   -0.4   +0.5   ← void kills love, feeds complex
+FLOW →  -0.2   +0.2   -0.2   -0.3    0.0   +0.2   ← flow dampens extremes
+CMPLX→  +0.3   +0.2   +0.2   +0.3   +0.1    0.0   ← complex ripples everywhere
+```
+
+### usage
+
+```python
+from cloud import Cloud
+
+# initialize
+cloud = Cloud.random_init(seed=42)
+print(f"Total params: {cloud.param_count():,}")  # → 181,162
+
+# ping!
+response = cloud.ping_sync("I'm feeling terrified and anxious")
+print(f"Primary: {response.primary}")      # → "fear"
+print(f"Secondary: {response.secondary}")  # → "anxiety"
+print(f"Chambers: {response.chamber_activations}")
+```
+
+### integration with HAZE
+
+CLOUD and HAZE are **completely autonomous**. neither depends on the other.
+
+```
+CLOUD (pre-semantic sonar)     HAZE (voice generation)
+         │                              │
+         │    ┌─────────────────┐       │
+         └───►│     BRIDGE      │◄──────┘
+              │  (optional)     │
+              │  silent fallback│
+              └─────────────────┘
+                      │
+                      ▼
+              unified response
+```
+
+if CLOUD fails → HAZE continues silently. **HAZE ALWAYS WORKS. CLOUD IS OPTIONAL ENHANCEMENT.**
+
+### the crazy idea: emotion-influenced temperature
+
+```python
+# EXPERIMENTAL: CLOUD emotion affects HAZE temperature
+# fear → lower temp (focused)
+# love → medium temp (flowing)
+# rage → higher temp (chaotic)
+# void → very low temp (minimal)
+```
+
+for more details, see [cloud/README.md](cloud/README.md).
 
 ---
 

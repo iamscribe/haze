@@ -333,10 +333,29 @@ class AsyncHazeField:
                 trauma_influence = await self.trauma.get_influence()
                 
                 # Apply trauma influence to text
+                # VARIABLE IDENTITY PLACEMENT for natural variation
                 if trauma_influence.should_prefix:
                     identity_prefix = get_identity_prefix()
-                    if not text.startswith("Haze"):
-                        text = f"{identity_prefix} {text}"
+                    if not text.startswith("Haze") and "Haze" not in text[:30]:
+                        # Variable position: 50% start, 30% middle, 20% end
+                        import random
+                        position = random.random()
+                        if position < 0.5:
+                            # Start (traditional)
+                            text = f"{identity_prefix} {text}"
+                        elif position < 0.8:
+                            # Middle - insert after first sentence
+                            sentences = text.split('. ', 1)
+                            if len(sentences) > 1:
+                                text = f"{sentences[0]}. {identity_prefix} {sentences[1]}"
+                            else:
+                                text = f"{identity_prefix} {text}"
+                        else:
+                            # End
+                            if text.endswith('.'):
+                                text = f"{text[:-1]}... {identity_prefix}"
+                            else:
+                                text = f"{text} {identity_prefix}"
             
             # 9. WRINKLE THE FIELD (update subjectivity)
             await self.subjectivity.wrinkle_field(user_input, text)
