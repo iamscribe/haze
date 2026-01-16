@@ -428,7 +428,7 @@ def create_interface():
         
         def chat(message, history):
             response, metadata = respond(message, history)
-            history = history + [(message, response)]
+            history = history + [{"role": "user", "content": message}, {"role": "assistant", "content": response}]
             return "", history, metadata
         
         msg.submit(chat, [msg, chatbot], [msg, chatbot, metadata_display])
